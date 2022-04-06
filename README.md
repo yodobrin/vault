@@ -89,3 +89,13 @@ For convienient purpose they are also listed here:
 5. to check logs you can run: ```sudo journalctl --no-pager -u vault```
 
 Accessing the UI can be done via: http://ip-of-the-vm:8200. Use the token saved earlier to access.
+
+## Clean Up
+
+Run the following command:
+
+```bash
+terraform destroy
+```
+
+This will clean all resources provisioned during the apply stage.
