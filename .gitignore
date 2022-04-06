@@ -30,3 +30,4 @@ override.tf.json
 deploy/terraform/.terraform.lock.hcl
 deploy/terraform/hashi.plan
 deploy/terraform/terraform.tfvars.example.val
+.DS_Store

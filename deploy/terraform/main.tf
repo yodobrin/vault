@@ -37,8 +37,7 @@ resource "azurerm_key_vault" "vault" {
   tenant_id           = var.tenant_id
 
   # enable virtual machines to access this key vault.
-  # NB this identity is used in the example /tmp/azure_auth.sh file.
-  #    vault is actually using the vault service principal.
+  
   enabled_for_deployment = true
 
   sku_name = "standard"
@@ -47,10 +46,9 @@ resource "azurerm_key_vault" "vault" {
     environment = var.environment
   }
 
-  # access policy for the hashicorp vault service principal.
+  # access policy for the hashicorp vault vm.
   access_policy {
     tenant_id = var.tenant_id
-    # object_id = data.azuread_service_principal.vault.object_id
     object_id = azurerm_linux_virtual_machine.tf_vm.identity.0.principal_id
     key_permissions = [
       "Get",
@@ -75,14 +73,14 @@ resource "azurerm_key_vault" "vault" {
     ]
   }
 
-  # TODO does this really need to be so broad? can it be limited to the vault vm?
+  
   network_acls {
     default_action = "Allow"
     bypass         = "AzureServices"
   }
 }
 
-# TODO the "generated" resource name is not very descriptive; why not use "vault" instead?
+
 # hashicorp vault will use this azurerm_key_vault_key to wrap/encrypt its master key.
 resource "azurerm_key_vault_key" "generated" {
   name         = var.key_name
@@ -251,8 +249,8 @@ resource "azurerm_linux_virtual_machine" "tf_vm" {
     public_key = var.public_key
   }
 
-  # NB this identity is used in the example /tmp/azure_auth.sh file.
-  #    vault is actually using the vault service principal.
+ 
+  # vault is actually using the vm identity.
   identity {
     type = "SystemAssigned"
   }

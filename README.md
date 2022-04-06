@@ -1,9 +1,13 @@
 
 # Using Hashicorp Vault
 
+## tl;dr
+
+This terraform would spin up an Ubuntu VM with Hashicorp Vault as a service, configured to unseal with Azure keyVault.
+
 ## Use case
 
-As an ISVs using Vault for their secret storage, avoiding proprietary use of tools such as Azure KeyVault, or GCP's secret manager, or AWS secret manager and their respective APIs. Instead I want to use the same SDK for my secrets management, and have an underline service control my seal/unseal of the vault.
+As an ISVs using Vault for their secret storage, avoiding services which are not available across multiple clouds and their respective APIs. Instead I want to use the same SDK for my secrets management, and have an underline service control my seal/unseal of the vault.
 
 Using Vault by hashicorp would allow my developers to focus on single set of API calls.
 
@@ -81,8 +85,6 @@ Examine the KeyVault access policy, it should show something like this:
 ### Vault configuration
 
 While the terraform script provision all resources required (and configure them) the final steps are to be executed manually. One of the reasons is to enable the operator to aquire required tokens & recovery keys.
-TODO: try to output the keys and token from the script.
-TODO: output the url of the vault UI.
 
 The steps are outlined in the [Quick Start](https://learn.hashicorp.com/tutorials/vault/autounseal-azure-keyvault?in=vault/auto-unseal#step-2-test-the-auto-unseal-feature).
 For convienient purpose they are also listed here:
@@ -91,7 +93,23 @@ For convienient purpose they are also listed here:
 
 2. Check the vault status by ```vault status```. You might need to restart the vault service (as it might finishined creation before the key in the keyvault) - ```sudo systemctl restart vault```
 
-3. Initilize the vault ```vault operator init``` this will output 5 recovery keys and an access token required to access the UI, save them.
+3. Initilize the vault ```vault operator init``` this will output 5 recovery keys and an access token required to access the UI, save them. The output from this operation would look like this:
+
+```bash
+azureuser@hashi-vault-demo-vm:~$ vault operator init
+Recovery Key 1: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Recovery Key 2: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Recovery Key 3: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Recovery Key 4: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Recovery Key 5: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Initial Root Token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Success! Vault is initialized
+
+Recovery key initialized with 5 key shares and a key threshold of 3. Please
+securely distribute the key shares printed above.
+```
 
 4. If you need to restart the vault use: ```sudo systemctl restart vault```
 
