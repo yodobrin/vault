@@ -9,7 +9,8 @@ Using Vault by hashicorp would allow my developers to focus on single set of API
 
 ## Credit
 
-This repo was taken from this [GitHub repository](https://github.com/hashicorp/vault). More information can be found ath this [Website](https://www.vaultproject.io).
+This repo was initialy taken from this [GitHub repository](https://github.com/hashicorp/vault). More information can be found ath this [Website](https://www.vaultproject.io).
+The original repo was altered to match more recent providers versions and semantics.
 
 While trying to implement the [Quick Start](https://learn.hashicorp.com/tutorials/vault/autounseal-azure-keyvault?in=vault/auto-unseal) it was noticed that dedicated project might be in order.
 
@@ -54,6 +55,10 @@ terraform apply "hashi-learn.plan"
 
 Post these commands, you should have a new resource group, with the name you specified in the variable file, KeyVault, Virtual Machine and storage account are created. Virtual network, subnet, nsg and rules are also created.
 
+Your newly created resource group should look like this:
+
+![deployments](./media/rg_content.png)
+
 #### KeyVault Access
 
 There are two ways you can allow the vault to access the KeyVault:
@@ -69,6 +74,10 @@ Verify that in the newly created KeyVault:
 
 - The access policy is allowing you (the user executing terraform) and the system assigned identity Get, Wrap & Unwrap roles.
 
+Examine the KeyVault access policy, it should show something like this:
+
+![policies](./media/akv_policies.png)
+
 ### Vault configuration
 
 While the terraform script provision all resources required (and configure them) the final steps are to be executed manually. One of the reasons is to enable the operator to aquire required tokens & recovery keys.
@@ -80,15 +89,17 @@ For convienient purpose they are also listed here:
 
 1. ssh to the vm ```ssh azureuser@<ip provided as output>```
 
-2. check the vault status by ```vault status```
+2. Check the vault status by ```vault status```. You might need to restart the vault service (as it might finishined creation before the key in the keyvault) - ```sudo systemctl restart vault```
 
-3. init the vault ```vault operator init``` this will output 5 recovery keys and an access token required to access the UI, save them.
+3. Initilize the vault ```vault operator init``` this will output 5 recovery keys and an access token required to access the UI, save them.
 
-4. if you need to restart the vault use: ```sudo systemctl restart vault```
+4. If you need to restart the vault use: ```sudo systemctl restart vault```
 
-5. to check logs you can run: ```sudo journalctl --no-pager -u vault```
+5. To check logs you can run: ```sudo journalctl --no-pager -u vault```
 
 Accessing the UI can be done via: http://ip-of-the-vm:8200. Use the token saved earlier to access.
+
+![login to vault](./media/login_to_vault.png)
 
 ## Clean Up
 
