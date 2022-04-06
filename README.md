@@ -57,7 +57,7 @@ Post these commands, you should have a new resource group, with the name you spe
 
 Your newly created resource group should look like this:
 
-![deployments](./media/rg_content.png)
+![resource group content](./media/rg_contnet.png)
 
 #### KeyVault Access
 
