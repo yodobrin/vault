@@ -2,7 +2,6 @@
 terraform {
   required_version = ">= 0.12"
   required_providers {
-    template = "~> 2.1.2"
     random   = "~> 2.3.0"
     azurerm  = "~> 3.0.2"
     azuread  = "~> 2.19.1"
@@ -219,18 +218,21 @@ resource "azurerm_storage_account" "tf_storageaccount" {
   }
 }
 
-data "template_file" "setup" {
-  template = file("${path.module}/setup.tpl")
 
-  vars = {
-    resource_group_name = "${var.environment}-vault-rg"
-    vm_name             = var.vm_name
-    vault_version       = var.vault_version
-    tenant_id           = var.tenant_id
-    subscription_id     = var.subscription_id
-    vault_name          = var.key_vault_name
-    key_name            = var.key_name
-  }
+
+data "template_file" "setup" {
+  template = templatefile("${path.module}/setup.tpl",  {
+            resource_group_name = "${var.environment}-vault-rg",
+            vm_name             = var.vm_name,
+            vault_version       = var.vault_version,
+            tenant_id           = var.tenant_id,
+            subscription_id     = var.subscription_id,
+            vault_name          = var.key_vault_name,
+            key_name            = var.key_name,
+          }
+  )
+  
+  
 }
 
 # Create virtual machine
