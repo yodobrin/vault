@@ -4,6 +4,7 @@
 ## tl;dr
 
 This terraform would spin up an Ubuntu VM with Hashicorp Vault as a service, configured to unseal with Azure keyVault.
+> You can also do it directly from your favorite browser using [GitHub Codespaces](https://github.com/features/codespaces)
 
 ## Use case
 
