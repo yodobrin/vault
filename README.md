@@ -20,6 +20,35 @@ While trying to implement the [Quick Start](https://learn.hashicorp.com/tutorial
 
 ## Setup
 
+### Using Codespaces
+
+- Create a new code space
+
+![new code space](./media/new_code_space.png)
+
+- Lunch the new space in your browser, the process will start with building the image you will be using
+
+![creating new image](./media/image_creation.png)
+
+![repo in browser](./media/repo_in_space.png)
+
+- Update ```variables.tf``` file with your subscription, tenant, resource group
+
+- Perform login to you Azure subscription - this is to ensure successful login to your account. Follow the instructions. For further reading check this [document](https://docs.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest#az-login)
+
+```bash
+az login --use-device-code
+```
+
+- Follow the rest of the instructions as if running from your local machine:
+
+```bash
+cd deploy/terraform
+terraform init
+terraform plan -out hashi.plan
+terraform apply "hashi.plan"
+```
+
 ### Terraform user/SPN
 
 If you running this for learning purposes, using your own identity (provided it has contributer role on your subscription) is enough. If you prefer using a service principle for the resource provisioning, please follow the steps 1 through 39 in the [Quick Start](https://learn.hashicorp.com/tutorials/vault/autounseal-azure-keyvault?in=vault/auto-unseal#create-an-azure-service-principal).
