@@ -49,10 +49,31 @@ Then use the provided ```variable.tf``` file for your subscription, by editing i
 
 TODO explain more on the sshkey
 
-Once the variable file is updated you will need to run the following commands in sequance:
+Once the variable file is updated you will need to run the following command to initialize the Terraform deployment:
 
 ```bash
 terraform init
+```
+
+>
+> **A Note for Apple M1 Chip Users:**
+>
+> If you're using macOS on an Apple M1 chip (Darwin Arm64 architecture), you might get an error once you run
+> `terraform init`, since the `template` provider is deprecated and is incompatible with this architecture. You will require it
+> nonetheless, as this provide is a dependency of other providers directly used in this example.  You can work around this issue
+> by installing [m1-terraform-provider-helper](https://github.com/kreuzwerker/m1-terraform-provider-helper).
+> The following commands should install `m1-terraform-provider-helper` and the `template` provider using Homebrew:
+>
+> ```bash
+> brew install kreuzwerker/taps/m1-terraform-provider-helper
+> m1-terraform-provider-helper activate
+> m1-terraform-provider-helper install hashicorp/template -v v2.2.0
+> ```
+>
+
+Run the following commands to plan and apply the Terraform deployment:
+
+```bash
 terraform plan -out hashi-learn.plan
 terraform apply "hashi-learn.plan"
 ```

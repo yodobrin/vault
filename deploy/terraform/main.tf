@@ -2,9 +2,9 @@
 terraform {
   required_version = ">= 0.12"
   required_providers {
-    random   = "~> 2.3.0"
-    azurerm  = "~> 3.0.2"
-    azuread  = "~> 2.19.1"
+    random   = "~> 3.1.2"
+    azurerm  = "~> 3.1.0"
+    azuread  = "~> 2.20.0"
   }
 }
 
