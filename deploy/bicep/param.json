@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "tenantid":{
+        "value": "your tenant id"
+      },
+      "user":{
+        "value": "you user objid"
+      },
+      "key_name": {
+        "value": "<first-value>"
+      },
+      "public_key": {
+        "value": "<second-value>"
+      },
+      "vm_name": {
+        "value": "avmname"
+      },
+      "adminUsername":{
+        "value": "your-user"
+      },
+      "adminPassword":{
+        "value": "your-pass"
+      },
+      "vault_version": {
+        "value": "1.10.0"
+      },
+      "key_vault_name": {
+        "value": "akv-hashi-vault"
+      }
+    }
+  }
