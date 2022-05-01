@@ -228,4 +228,19 @@ resource keyvault 'Microsoft.KeyVault/vaults@2021-10-01' = {
   }
 }
 
+param key_name string
+
+
+resource key 'Microsoft.KeyVault/vaults/keys@2021-10-01' = {
+  name: '${key_vault_name}/${key_name}'
+  properties: {
+    kty: 'RSA' // key type
+    keyOps: [
+      // key operations
+      'wrapKey'
+      'unwrapKey'
+    ]
+    keySize: 2048
+  }
+}
 
