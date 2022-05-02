@@ -4,7 +4,7 @@
   "parameters": {
     
     "userObjId":{
-      "value": "2f1b09f9-1887-46f5-b0e4-d7a8e47fe87f"
+      "value": "your-user-obj-id"
     },
     "keyName": {
       "value": "name-of-key"
