@@ -232,7 +232,8 @@ param key_name string
 
 
 resource key 'Microsoft.KeyVault/vaults/keys@2021-10-01' = {
-  name: '${key_vault_name}/${key_name}'
+  parent:keyvault
+  name: key_name
   properties: {
     kty: 'RSA' // key type
     keyOps: [
