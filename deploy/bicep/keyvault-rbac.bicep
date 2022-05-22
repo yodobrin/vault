@@ -1,8 +1,10 @@
 @description('Specifies the name of the key vault.')
-param keyVaultName string = 'akv-hashi-vault11'
+param key_vault_name string 
 
 @description('Specifies the Azure location where the key vault should be created.')
-param location string = resourceGroup().location
+param location string 
+
+param vmIdentityObjId string
 
 @description('Specifies whether the key vault is a standard vault or a premium vault.')
 @allowed([
@@ -37,12 +39,13 @@ var roleIdMapping = {
   'Key Vault Reader': '21090545-7ca7-4776-b22c-e363652d74d2'
   'Key Vault Secrets Officer': 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7'
   'Key Vault Secrets User': '4633458b-17de-408a-b874-0445c86b69e6'
+  'Owner': '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
 }
 
 
 
 resource kv 'Microsoft.KeyVault/vaults@2021-04-01-preview' = {
-  name: keyVaultName
+  name: key_vault_name
   location: location
   properties: {
     enabledForDeployment: enabledForDeployment
@@ -62,9 +65,20 @@ resource kv 'Microsoft.KeyVault/vaults@2021-04-01-preview' = {
   }
 }
 
+param cryptoOfficer string = 'Key Vault Crypto Officer'
+resource CryptoAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(roleIdMapping[cryptoOfficer],vmIdentityObjId,kv.id)
+  scope: kv
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIdMapping[cryptoOfficer])
+    principalId: vmIdentityObjId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 
 param adminRole string = 'Key Vault Administrator'
-resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource adminAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
   name: guid(roleIdMapping[adminRole],userObjId,kv.id)
   scope: kv
   properties: {
@@ -75,7 +89,7 @@ resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-pr
 }
 
 param readerRole string = 'Key Vault Reader'
-resource kvRoleAssignment1 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource readerAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
   name: guid(roleIdMapping[readerRole],userObjId,kv.id)
   scope: kv
   properties: {
@@ -85,14 +99,26 @@ resource kvRoleAssignment1 'Microsoft.Authorization/roleAssignments@2020-04-01-p
   }
 }
 
-param keyName string 
+param ownerRole string = 'Owner'
+resource ownerAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(roleIdMapping[ownerRole],userObjId,kv.id)
+  scope: kv
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleIdMapping[ownerRole])
+    principalId: userObjId
+    principalType: 'User'
+  }
+}
+
+param key_name string 
 
 resource key 'Microsoft.KeyVault/vaults/keys@2021-10-01' = {
   parent: kv
-  name: keyName
+  name: key_name
   dependsOn: [
-    kvRoleAssignment
-    kvRoleAssignment1
+    adminAssignment
+    readerAssignment
+    ownerAssignment
   ]
   properties: {
     kty: 'RSA' // key type

@@ -1,27 +1,27 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": {
-    "tenantid":{
-      "value": "your tenant id"
-    },
-    "user":{
+  "parameters": {    
+    "userObjId":{
       "value": "you user objid"
     },
     "key_name": {
       "value": "name-of-key"
     },    
     "vm_name": {
-      "value": "avmname"
+      "value": "your vault vm name"
     },
     "adminUsername":{
-      "value": "your-user"
+      "value": "vm-user"
     },
     "adminPassword":{
-      "value": "your-pass"
+      "value": "vm-password"
     },    
     "key_vault_name": {
       "value": "a-key-vault-unique-name"
-    }
+    },
+    "suffix": {
+        "value": "unique-suffix"
+      }
   }
 }

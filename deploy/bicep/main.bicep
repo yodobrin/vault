@@ -1,17 +1,20 @@
 param location string = resourceGroup().location
-param user string 
+// param user string 
 param vmName string 
+param key_vault_name string 
+param key_name string
+param userObjId string
 
-param suffix string = 'a${uniqueString(resourceGroup().id)}'
+param suffix string 
 param adminUsername string 
 param adminPassword string 
 
-param tenantid string 
+// param tenantid string 
 
 
 // storage for diagniostic 
 resource diag_storage 'Microsoft.Storage/storageAccounts@2021-02-01' = {
-  name: 'sa${suffix}'
+  name: 'akvydsa${suffix}'
   location: location
   kind: 'StorageV2'
   sku: {
@@ -88,7 +91,7 @@ output networkSecurityGroup string = nsg.id
 // subnet for the vm
 resource subnet 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' = {
   parent: vnet
-  name: 'sub${suffix}'
+  name: 'subnet${suffix}'
   properties: {
     addressPrefix: '10.0.0.0/24'
     networkSecurityGroup: {
@@ -133,7 +136,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
 // created with system assigned identity
 // this vm is created with user/pass, you can use ssh key for enhanced security 
 resource vm 'Microsoft.Compute/virtualMachines@2021-03-01' = {
-  name: 'vm${suffix}'
+  name: '${vmName}${suffix}'
   location: location
   identity: {
     type: 'SystemAssigned'
@@ -177,71 +180,16 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-03-01' = {
     }
   }
 }
-output vmIdentity string = vm.identity.principalId
 
-param networkAcls object = {
-  ipRules: []
-  virtualNetworkRules: []
-}
-param key_vault_name string
-// Azure Key Vault
-// Created with vault access policies:
-// required policy for the vm (wrap/unwrap)
-// all key (including purge) for you
-resource keyvault 'Microsoft.KeyVault/vaults@2021-10-01' = {
-  name: key_vault_name
-  location: location
-  properties: {
-    tenantId: tenantid
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
-    accessPolicies: [
-      {
-        tenantId: tenantid
-        objectId: vm.identity.principalId
-        permissions: {
-          keys: [
-            'get'
-            'wrapKey'
-            'unwrapKey'
-          ]                   
-        }
-      }
-      {
-        tenantId: tenantid
-        objectId: user
-        permissions: {
-          keys: [
-            'all'
-            'purge'
-          ]                   
-        }
-      }
-    ]
-    enabledForDeployment: true
-    enabledForDiskEncryption: true
-    enabledForTemplateDeployment: true
-    enableSoftDelete : true
-    networkAcls: networkAcls
+
+
+module AKV 'keyvault-rbac.bicep' = {
+  name: 'keyVault'
+  params: {
+    key_vault_name: '${key_vault_name}${suffix}'
+    userObjId : userObjId
+    key_name: key_name
+    location: location
+    vmIdentityObjId: vm.identity.principalId
   }
 }
-
-param key_name string
-
-
-resource key 'Microsoft.KeyVault/vaults/keys@2021-10-01' = {
-  parent:keyvault
-  name: key_name
-  properties: {
-    kty: 'RSA' // key type
-    keyOps: [
-      // key operations
-      'wrapKey'
-      'unwrapKey'
-    ]
-    keySize: 2048
-  }
-}
-
