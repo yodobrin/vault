@@ -103,3 +103,4 @@ vault write auth/azure/login \
   vm_name="$vm_name"
 EOF
 chmod +x /tmp/azure_auth.sh
+export VAULT_ADDR='http://127.0.0.1:8200'
