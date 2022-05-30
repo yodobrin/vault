@@ -1,15 +1,26 @@
+@description('The location of the resource group and the location in which all resurces would be created')
 param location string = resourceGroup().location
-// param user string 
+@description('The resource group name')
+param rg_name string = resourceGroup().name 
+@description('The vm name hosting the vault')
 param vmName string 
+@description('The name of the keyvault')
 param key_vault_name string 
+@description('The name of the key used to open the vault')
 param key_name string
+@description('The object id of the user executing this bicep')
 param userObjId string
-
+@description('The suffix added to all resources to be created')
 param suffix string 
+@description('The admin username')
 param adminUsername string 
+@description('The password of admin user')
 param adminPassword string 
 
-// param tenantid string 
+@description('Specifies the relative path of the script used to initialize the virtual machine. note it is pointing to the raw file')
+param scriptFilePath string = 'https://raw.githubusercontent.com/yodobrin/vault/main/deploy/bicep/configure_vault.sh'
+@description('Specifies the name of the script to execute')
+param scriptName string = 'configure_vault.sh'
 
 
 // storage for diagniostic 
@@ -32,7 +43,7 @@ resource pip 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
     publicIPAllocationMethod: 'Static'    
   }
 }
-
+output ip string = pip.properties.ipAddress
 // network security group with required ports open for vault and ssh
 resource nsg 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
   name: 'nsg${suffix}'
@@ -132,6 +143,12 @@ resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
     ]
   }
 }
+
+param vault_version string
+param tenantId string = subscription().tenantId
+param subscriptionId string = subscription().subscriptionId
+
+
 // VM - hosting the vault
 // created with system assigned identity
 // this vm is created with user/pass, you can use ssh key for enhanced security 
@@ -141,6 +158,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-03-01' = {
   identity: {
     type: 'SystemAssigned'
   }
+    
   properties: {
     hardwareProfile: {
       vmSize: 'Standard_DS1_v2'
@@ -150,6 +168,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-03-01' = {
       computerName: vmName
       adminUsername: adminUsername
       adminPassword: adminPassword
+      // customData : base64(rendedFile)
     }
     storageProfile: {
       imageReference: {
@@ -181,7 +200,27 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-03-01' = {
   }
 }
 
-
+resource customScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: vm
+  name: 'CustomScript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Azure.Extensions'
+    type: 'CustomScript'
+    typeHandlerVersion: '2.0'
+    autoUpgradeMinorVersion: true
+    settings: {
+      skipDos2Unix: false
+      timestamp: 123456789
+      fileUris: [
+        scriptFilePath
+      ]
+    }    
+    protectedSettings: {
+      commandToExecute: 'bash ${scriptName} ${vault_version} ${tenantId} ${AKV.outputs.key_vault_name} ${key_name} ${subscriptionId} ${rg_name} ${vmName}'
+    }
+  }
+}
 
 module AKV 'keyvault-rbac.bicep' = {
   name: 'keyVault'

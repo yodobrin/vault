@@ -130,3 +130,5 @@ resource key 'Microsoft.KeyVault/vaults/keys@2021-10-01' = {
     keySize: 2048
   }
 }
+
+output key_vault_name string = kv.name
