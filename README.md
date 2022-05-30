@@ -15,18 +15,13 @@ Using Vault by hashicorp would allow my developers to focus on single set of API
 
 ## Bicep Setup
 
-- Clone this repo to your local machine
+- Clone this repo to your local machine ```git clone https://github.com/yodobrin/vault```
 
-```bash
-git clone https://github.com/yodobrin/vault```
-
-- Change directory to ```bash
-- ../vault/deploy/bicep```
+- Change directory to ```../vault/deploy/bicep```
 
 - Modify the file ```param.json``` and replace the values to match your settings.
 
-- Run this command :```azurecli
-- az deployment group create --resource-group <your-rg-name> --template-file main.bicep --parameters @param.json```
+- Run this command :```- az deployment group create --resource-group <your-rg-name> --template-file main.bicep --parameters @param.json```
 
 ## Terraform Setup
 
