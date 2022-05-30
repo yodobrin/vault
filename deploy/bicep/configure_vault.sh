@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 # Variables
 vault_version=$1
@@ -9,7 +9,7 @@ subscription_id=$5
 resource_group_name=$6
 vm_name=$7
 
-#!/bin/bash
+
 # NB this file will be executed as root by cloud-init.
 # NB to troubleshoot the execution of this file, you can:
 #      1. access the virtual machine boot diagnostics pane in the azure portal.
@@ -61,6 +61,7 @@ seal "azurekeyvault" {
   key_name       = "$key_name"
 }
 EOF
+
 systemctl enable vault
 systemctl restart vault
 
@@ -97,8 +98,8 @@ vault write auth/azure/role/dev-role \
 vault write auth/azure/login \
   role="dev-role" \
   jwt="$(curl 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F' -H Metadata:true -s | jq -r .access_token)" \
-  subscription_id="${subscription_id}" \
-  resource_group_name="${resource_group_name}" \
+  subscription_id="$subscription_id" \
+  resource_group_name="$resource_group_name" \
   vm_name="$vm_name"
 EOF
 chmod +x /tmp/azure_auth.sh
