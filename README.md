@@ -3,8 +3,9 @@
 
 ## tl;dr
 
-This terraform would spin up an Ubuntu VM with Hashicorp Vault as a service, configured to unseal with Azure keyVault.
+This repo would spin up an Ubuntu VM with Hashicorp Vault as a service, configured to unseal with Azure keyVault.
 > You can also do it directly from your favorite browser using [GitHub Codespaces](https://github.com/features/codespaces)
+> This is demonstrated with terraform, or with bicep.
 
 ## Use case
 
@@ -12,14 +13,18 @@ As an ISVs using Vault for their secret storage, avoiding services which are not
 
 Using Vault by hashicorp would allow my developers to focus on single set of API calls.
 
-## Credit
+## Bicep Setup
 
-This repo was initialy taken from this [GitHub repository](https://github.com/hashicorp/vault). More information can be found ath this [Website](https://www.vaultproject.io).
-The original repo was altered to match more recent providers versions and semantics.
+- Clone this repo to your local machine
+```git clone https://github.com/yodobrin/vault```bash
 
-While trying to implement the [Quick Start](https://learn.hashicorp.com/tutorials/vault/autounseal-azure-keyvault?in=vault/auto-unseal) it was noticed that dedicated project might be in order.
+- Change directory to ```../vault/deploy/bicep```bash
 
-## Setup
+- Modify the file ```param.json```bash and replace the values to match your settings.
+
+- Run this command :```az deployment group create --resource-group <your-rg-name> --template-file main.bicep --parameters @param.json```azurecli
+
+## Terraform Setup
 
 ### Using Codespaces
 
@@ -114,14 +119,21 @@ Your newly created resource group should look like this:
 
 ![resource group content](./media/rg_contnet.png)
 
-#### KeyVault Access
+### Credit
+
+The terraform section was initialy taken from this [GitHub repository](https://github.com/hashicorp/vault). More information can be found ath this [Website](https://www.vaultproject.io).
+The original repo was altered to match more recent providers versions and semantics.
+
+While trying to implement the [Quick Start](https://learn.hashicorp.com/tutorials/vault/autounseal-azure-keyvault?in=vault/auto-unseal) it was noticed that dedicated project might be in order.
+
+## KeyVault Access
 
 There are two ways you can allow the vault to access the KeyVault:
 
 - Use dedicated SPN, grant it Get, Wrap & Un-Wrap roles.
 - Use System Assigned managed identity of the VM hosting the vault - preffered method.
 
-In this repo, the preffered option is outlined.
+In this repo, the preffered option is outlined. (for both Bicep and terraform)
 
 Verify that in the newly created KeyVault:
 
@@ -133,18 +145,19 @@ Examine the KeyVault access policy, it should show something like this:
 
 ![policies](./media/akv_policies.png)
 
-### Vault configuration
+## Vault configuration
 
-While the terraform script provision all resources required (and configure them) the final steps are to be executed manually. One of the reasons is to enable the operator to aquire required tokens & recovery keys.
+While the Bicep/terraform script provision all resources required (and configure them) the final steps are to be executed manually. One of the reasons is to enable the operator to aquire required tokens & recovery keys.
 
 The steps are outlined in the [Quick Start](https://learn.hashicorp.com/tutorials/vault/autounseal-azure-keyvault?in=vault/auto-unseal#step-2-test-the-auto-unseal-feature).
 For convienient purpose they are also listed here:
+> The user mentioned here might be diffrent from the one you create.
 
-1. ssh to the vm ```ssh azureuser@<ip provided as output>```
+1.ssh to the vm ```ssh azureuser@<ip provided as output>```
 
-2. Check the vault status by ```vault status```. You might need to restart the vault service (as it might finishined creation before the key in the keyvault) - ```sudo systemctl restart vault```
+2.Check the vault status by ```vault status```. You might need to restart the vault service (as it might finishined creation before the key in the keyvault) - ```sudo systemctl restart vault```
 
-3. Initilize the vault ```vault operator init``` this will output 5 recovery keys and an access token required to access the UI, save them. The output from this operation would look like this:
+3.Initilize the vault ```vault operator init``` this will output 5 recovery keys and an access token required to access the UI, save them. The output from this operation would look like this:
 
 ```bash
 azureuser@hashi-vault-demo-vm:~$ vault operator init
@@ -162,15 +175,21 @@ Recovery key initialized with 5 key shares and a key threshold of 3. Please
 securely distribute the key shares printed above.
 ```
 
-4. If you need to restart the vault use: ```sudo systemctl restart vault```
+4.If you need to restart the vault use: ```sudo systemctl restart vault```
 
-5. To check logs you can run: ```sudo journalctl --no-pager -u vault```
+5.To check logs you can run: ```sudo journalctl --no-pager -u vault```
 
 Accessing the UI can be done via: http://ip-of-the-vm:8200. Use the token saved earlier to access.
 
 ![login to vault](./media/login_to_vault.png)
 
 ## Clean Up
+
+### Bicep
+
+Bicep does not provide (yet) a destroy method. You can delete the resources created via the portal, or using cli.
+
+### Terraform
 
 Run the following command:
 
